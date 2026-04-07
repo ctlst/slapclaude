@@ -23,12 +23,11 @@ This builds the app, signs it, and copies it to `/Applications/SlapClaude.app`.
 open /Applications/SlapClaude.app
 ```
 
-Two permissions are required:
+One permission is required:
 
-- **Microphone** — detects the impact sound of a slap
 - **Accessibility** — types the phrase into Claude Code
 
-Both prompts appear automatically on first launch. If Accessibility doesn't prompt, go to System Settings → Privacy & Security → Accessibility and add the app manually.
+The prompt appears automatically on first launch. If it doesn't, go to System Settings → Privacy & Security → Accessibility and add the app manually.
 
 ## Usage
 
@@ -74,14 +73,10 @@ This shows slap detections, focus check results, and why a phrase may have been 
 
 ## How it works
 
-- **Detection** — `AVAudioEngine` taps the built-in microphone and computes RMS amplitude per buffer. A sharp spike above an exponential moving average baseline triggers a slap event. The built-in mic is explicitly pinned via CoreAudio so plugging in headphones doesn't redirect input to a weaker external mic.
+- **Detection** — reads the built-in BMI286 IMU via IOKit by directly waking the `AppleSPUHIDDriver` (`SensorPropertyReportingState`, `SensorPropertyPowerState`) and opening `AppleSPUHIDDevice` via `IOHIDDeviceCreate`. This bypasses the `motionRestrictedService` restriction that blocks the standard `IOHIDManager` path. Slap detection uses magnitude spike above an exponential moving average baseline at ~800Hz. Falls back to microphone-based detection if the accelerometer is unavailable.
 - **Focus check** — uses `NSWorkspace` to confirm the Claude Code desktop app or a supported terminal running the `claude` CLI is frontmost before typing.
 - **Typing** — `CGEventPost` injects the phrase character by character followed by Return.
 
 ## Supported terminals
 
 Ghostty, iTerm2, Terminal, Warp, Alacritty, kitty, WezTerm, Hyper.
-
-## Notes
-
-The Apple Silicon accelerometer is kernel-restricted (`motionRestrictedService`) and `CMMotionManager` is unavailable on macOS — microphone impact detection is used instead and works well in practice.
