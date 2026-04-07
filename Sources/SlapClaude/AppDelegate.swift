@@ -3,10 +3,12 @@ import Foundation
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
-    private let slapDetector = AudioSlapDetector()
+    private let accel        = AccelerometerSlapDetector()
+    private let audio        = AudioSlapDetector()
     private let focus        = FocusChecker()
     private let typer        = Typer()
     private let phrases      = PhraseManager()
+    private var usingAccel   = false
 
     private var isEnabled: Bool {
         get { UserDefaults.standard.object(forKey: "enabled") as? Bool ?? true }
@@ -15,7 +17,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private var sensitivity: Sensitivity {
         get { Sensitivity(rawValue: UserDefaults.standard.integer(forKey: "sensitivity")) ?? .medium }
-        set { UserDefaults.standard.set(newValue.rawValue, forKey: "sensitivity"); slapDetector.sensitivity = newValue; refreshMenu() }
+        set {
+            UserDefaults.standard.set(newValue.rawValue, forKey: "sensitivity")
+            accel.sensitivity = newValue
+            audio.sensitivity = newValue
+            refreshMenu()
+        }
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -96,14 +103,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Pipeline
 
     private func setupPipeline() {
-        slapDetector.sensitivity = sensitivity
-        slapDetector.onSlap = { [weak self] in self?.handleSlap() }
-        slapDetector.requestPermissionAndStart { granted in
-            if !granted {
-                self.showAlert(
-                    title: "Microphone access required",
-                    message: "SlapClaude listens for the impact sound of a slap. Please grant microphone access in System Settings → Privacy & Security → Microphone."
-                )
+        accel.sensitivity = sensitivity
+        accel.onSlap = { [weak self] in self?.handleSlap() }
+
+        if accel.start() {
+            usingAccel = true
+            log("Using accelerometer for slap detection")
+        } else {
+            log("Accelerometer unavailable — falling back to microphone")
+            audio.sensitivity = sensitivity
+            audio.onSlap = { [weak self] in self?.handleSlap() }
+            audio.requestPermissionAndStart { granted in
+                if !granted {
+                    self.showAlert(
+                        title: "Microphone access required",
+                        message: "SlapClaude needs microphone access. Grant it in System Settings → Privacy & Security → Microphone."
+                    )
+                }
             }
         }
     }

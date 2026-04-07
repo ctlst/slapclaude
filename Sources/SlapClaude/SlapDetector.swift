@@ -14,12 +14,20 @@ enum Sensitivity: Int, CaseIterable {
     }
 
     // RMS amplitude spike above baseline (0.0–1.0 normalized audio).
-    // A moderate palm-slap on a MacBook typically produces 0.15–0.4 RMS.
     var audioThreshold: Float {
         switch self {
-        case .low:    return 0.35  // Firm slap only
-        case .medium: return 0.18  // Normal slap
-        case .high:   return 0.08  // Light tap
+        case .low:    return 0.35
+        case .medium: return 0.18
+        case .high:   return 0.08
+        }
+    }
+
+    // g-force spike above EMA baseline (~1g at rest).
+    var accelThreshold: Double {
+        switch self {
+        case .low:    return 3.0
+        case .medium: return 1.5
+        case .high:   return 0.8
         }
     }
 }
