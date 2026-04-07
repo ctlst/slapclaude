@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleExecutable</key>
+    <string>SlapClaude</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.slapclaude.app</string>
+    <key>CFBundleName</key>
+    <string>SlapClaude</string>
+    <key>CFBundleDisplayName</key>
+    <string>SlapClaude</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0.0</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>LSUIElement</key>
+    <true/>
+    <key>NSPrincipalClass</key>
+    <string>NSApplication</string>
+    <key>NSHighResolutionCapable</key>
+    <true/>
+    <key>LSMinimumSystemVersion</key>
+    <string>14.0</string>
+    <key>NSAccessibilityUsageDescription</key>
+    <string>SlapClaude needs Accessibility access to type encouraging phrases into your Claude Code terminal.</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>SlapClaude listens for the impact sound of a slap to trigger encouraging phrases.</string>
+</dict>
+</plist>
