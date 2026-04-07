@@ -25,9 +25,9 @@ enum Sensitivity: Int, CaseIterable {
     // g-force spike above EMA baseline (~1g at rest).
     var accelThreshold: Double {
         switch self {
-        case .low:    return 3.0
-        case .medium: return 1.5
-        case .high:   return 0.8
+        case .low:    return 1.5
+        case .medium: return 0.5
+        case .high:   return 0.2
         }
     }
 }
