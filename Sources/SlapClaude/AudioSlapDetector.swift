@@ -13,6 +13,8 @@ final class AudioSlapDetector {
     private var configChangeObserver: Any?
     private var baseline: Float = 0.0
     private var lastSlapTime: Date = .distantPast
+    private var warmupUntil: Date = .distantPast
+    private var lastEngineStart: Date = .distantPast
     private let debounce: TimeInterval = 0.6
     private let emaAlpha: Float = 0.05
 
@@ -73,15 +75,18 @@ final class AudioSlapDetector {
             object: eng,
             queue: .main
         ) { [weak self] _ in
+            guard let self, Date().timeIntervalSince(self.lastEngineStart) > 1.0 else { return }
             log("Audio route changed — restarting engine")
-            // Async so we're not restarting from within the notification itself.
-            DispatchQueue.main.async { self?.stop(); self?.startEngine() }
+            DispatchQueue.main.async { self.stop(); self.startEngine() }
         }
 
         do {
             try eng.start()
             engine = eng
-            log("Audio engine started OK")
+            baseline = 0.0
+            lastEngineStart = Date()
+            warmupUntil = Date(timeIntervalSinceNow: 2.0)
+            log("Audio engine started OK — warming up for 2s")
         } catch {
             log("Audio engine failed: \(error)")
         }
@@ -98,7 +103,7 @@ final class AudioSlapDetector {
 
         let spike = rms - baseline
 
-        if spike > sensitivity.audioThreshold {
+        if spike > sensitivity.audioThreshold && Date() > warmupUntil {
             let now = Date()
             if now.timeIntervalSince(lastSlapTime) > debounce {
                 lastSlapTime = now
