@@ -1,6 +1,6 @@
 # SlapClaude
 
-Slap your MacBook. It types an encouraging message into Claude Code.
+Slap your MacBook. It types an encouraging message into Claude Code, Codex, or OpenCode.
 
 ## Requirements
 
@@ -25,7 +25,7 @@ open /Applications/SlapClaude.app
 
 One permission is required:
 
-- **Accessibility** — types the phrase into Claude Code
+- **Accessibility** — types the phrase into the focused supported app
 
 The prompt appears automatically on first launch. If it doesn't, go to System Settings → Privacy & Security → Accessibility and add the app manually.
 
@@ -33,7 +33,7 @@ The prompt appears automatically on first launch. If it doesn't, go to System Se
 
 SlapClaude runs as a menu bar app with no dock icon. Once running:
 
-1. Open Claude Code (desktop app or CLI in a terminal)
+1. Open Claude Code, Codex, or OpenCode (desktop app or CLI in a terminal)
 2. Make sure it's the focused window
 3. Slap your MacBook
 4. A random encouraging phrase is typed and submitted
@@ -74,7 +74,7 @@ This shows slap detections, focus check results, and why a phrase may have been 
 ## How it works
 
 - **Detection** — reads the built-in BMI286 IMU via IOKit by directly waking the `AppleSPUHIDDriver` (`SensorPropertyReportingState`, `SensorPropertyPowerState`) and opening `AppleSPUHIDDevice` via `IOHIDDeviceCreate`. This bypasses the `motionRestrictedService` restriction that blocks the standard `IOHIDManager` path. Slap detection uses magnitude spike above an exponential moving average baseline at ~800Hz. Falls back to microphone-based detection if the accelerometer is unavailable.
-- **Focus check** — uses `NSWorkspace` to confirm the Claude Code desktop app or a supported terminal running the `claude` CLI is frontmost before typing.
+- **Focus check** — uses `NSWorkspace` to confirm a supported desktop app or a supported terminal running the `claude`, `codex`, or `opencode` CLI is frontmost before typing.
 - **Typing** — `CGEventPost` injects the phrase character by character followed by Return.
 
 ## Supported terminals

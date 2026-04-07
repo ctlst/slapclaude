@@ -1,16 +1,17 @@
 import AppKit
 import Foundation
 
-// Checks whether Claude Code is the active application.
+// Checks whether a supported coding tool is the active application.
 // Handles two cases:
-//   1. The Claude Code desktop app is frontmost.
-//   2. A supported terminal emulator is frontmost AND a 'claude' process is running.
+//   1. A supported desktop app is frontmost.
+//   2. A supported terminal emulator is frontmost AND a supported CLI process is running.
 final class FocusChecker {
-    private let claudeAppNames: Set<String> = ["Claude", "Claude Code"]
-    private let claudeBundleIDs: Set<String> = [
+    private let supportedAppNames: Set<String> = ["Claude", "Claude Code", "Codex", "OpenCode"]
+    private let supportedBundleIDs: Set<String> = [
         "com.anthropic.claudecode",
         "com.anthropic.claude",
     ]
+    private let supportedCLIProcesses: Set<String> = ["claude", "codex", "opencode"]
     private let terminalBundleIDs: Set<String> = [
         "com.apple.Terminal",
         "com.googlecode.iterm2",
@@ -23,21 +24,21 @@ final class FocusChecker {
         "com.qvacua.VimR",
     ]
 
-    func isClaudeCodeActive() -> Bool {
+    func isSupportedToolActive() -> Bool {
         guard let front = NSWorkspace.shared.frontmostApplication else { return false }
         let name   = front.localizedName ?? ""
         let bundle = front.bundleIdentifier ?? ""
 
-        if claudeAppNames.contains(name) || claudeBundleIDs.contains(bundle) {
+        if supportedAppNames.contains(name) || supportedBundleIDs.contains(bundle) {
             return true
         }
         if terminalBundleIDs.contains(bundle) {
-            return isClaudeCLIRunning()
+            return isSupportedCLIRunning()
         }
         return false
     }
 
-    private func isClaudeCLIRunning() -> Bool {
+    private func isSupportedCLIRunning() -> Bool {
         // pgrep -x is unreliable on macOS for some process names; use ps instead.
         let task = Process()
         task.executableURL = URL(fileURLWithPath: "/bin/ps")
@@ -49,7 +50,9 @@ final class FocusChecker {
             try task.run()
             task.waitUntilExit()
             let output = String(data: pipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
-            return output.components(separatedBy: "\n").contains { $0.trimmingCharacters(in: .whitespaces) == "claude" }
+            return output.components(separatedBy: "\n").contains {
+                supportedCLIProcesses.contains($0.trimmingCharacters(in: .whitespaces))
+            }
         } catch {
             return false
         }

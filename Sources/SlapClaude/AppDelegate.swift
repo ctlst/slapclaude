@@ -128,7 +128,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         guard isEnabled else { log("blocked: disabled"); return }
         let front = NSWorkspace.shared.frontmostApplication
         log("slap — frontmost: \(front?.localizedName ?? "nil") [\(front?.bundleIdentifier ?? "nil")]")
-        guard focus.isClaudeCodeActive() else { log("blocked: focus check failed"); return }
+        guard focus.isSupportedToolActive() else { log("blocked: focus check failed"); return }
         guard typer.hasAccessibilityPermission else { log("blocked: no accessibility"); return }
         let phrase = phrases.randomPhrase()
         log("typing: \(phrase)")
